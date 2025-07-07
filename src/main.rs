@@ -16,15 +16,26 @@ struct PyPredictReq {
 
 
 #[derive(Debug, Serialize, Deserialize)]
+struct LayerActivation {
+    layer_index: i32,
+    layer_name: String,
+    layer_type: String,
+    output_shape: Vec<i32>,
+    activations: Vec<f64>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 struct PyPreidctRes {
     prediction: i64,
     probabilities: Vec<f64>,
+    layer_activations: Option<Vec<LayerActivation>>,
+    confidence: Option<f64>,
 }
 
 async fn send_to_python_and_get_prediction(
     python_backend_url: &str,
     base64_image_data: &str,
-) -> Result<(i64, Vec<f64>), String> {
+) -> Result<PyPreidctRes, String> {
     let client = reqwest::Client::new();
     let request_body = PyPredictReq {
         image: base64_image_data.to_string(),
@@ -41,7 +52,7 @@ async fn send_to_python_and_get_prediction(
         let py_response: PyPreidctRes = response.json()
             .await
             .map_err(|e| format!("Python backend yanıtını ayrıştırırken hata: {}", e))?;
-        Ok((py_response.prediction, py_response.probabilities))
+        Ok(py_response)
     } else {
         let status = response.status();
         let text = response.text().await.unwrap_or_else(|_| "Yanıt metni okunamadı".to_string());
@@ -59,11 +70,14 @@ async fn predict(
         &py_backend_url_data.get_ref(),
         &req.image,
     ).await {
-        Ok((prediction, probabilities)) => HttpResponse::Ok().json(
+        Ok(py_response) => HttpResponse::Ok().json(
             serde_json::json!({
                 "type": "prediction_result",
-                "prediction": prediction,
-                "cnn_viz_data": { "prediction_scores": probabilities }
+                "prediction": py_response.prediction,
+                "probabilities": py_response.probabilities,
+                "layer_activations": py_response.layer_activations,
+                "confidence": py_response.confidence,
+                "cnn_viz_data": { "prediction_scores": py_response.probabilities }
             })
         ),
         Err(e) => HttpResponse::InternalServerError().json(

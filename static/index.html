@@ -4,44 +4,57 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Yazısı Rakam Tanıma (Statik)</title>
+    <title>Handwritten Digit Recognition (Static)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css"> 
 </head>
 <body class="bg-gray-900 min-h-screen flex items-center justify-center p-4 text-gray-100">
-    <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-6xl">
-        <div class="flex flex-col md:flex-row gap-8">
-            <div class="flex-1 flex flex-col items-center">
-                <h2 class="text-xl font-semibold mb-4 text-gray-200">Rakam Çizin</h2>
-                <canvas id="drawingCanvas" width="280" height="280" class="rounded-md"></canvas>
-                <button id="clearButton" class="mt-4 px-6 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition duration-200">Temizle</button>
+    <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Panel - Drawing Area -->
+            <div class="flex flex-col items-center space-y-4">
+                <div class="bg-gray-700 p-4 rounded-lg w-full">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-200 text-center">Draw a Digit</h2>
+                    <div class="flex justify-center">
+                        <canvas id="drawingCanvas" width="280" height="280" class="rounded-md border-2 border-gray-600"></canvas>
+                    </div>
+                    <div class="flex justify-center mt-4">
+                        <button id="clearButton" class="px-6 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition duration-200 shadow-lg">Clear</button>
+                    </div>
+                </div>
 
-                <div id="predictionProbabilities" class="w-full">
-                    <h3 class="text-lg font-semibold mb-2 text-gray-200">Tahmin Olasılıkları:</h3>
+                <div id="predictionProbabilities" class="w-full bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-200 text-center">Prediction Probabilities</h3>
                     <ul id="probabilityList" class="space-y-1">
                         <!-- Probabilities will be populated here -->
                     </ul>
-                    <div id="closePredictionWarning" class="hidden mt-2 text-yellow-400 text-sm">
-                        ⚠️ Tahminler birbirine yakın!
+                    <div id="closePredictionWarning" class="hidden mt-2 text-yellow-400 text-sm text-center">
+                        ⚠️ Predictions are very close!
                     </div>
                 </div>
             </div>
 
-            <div class="flex-1 flex flex-col gap-6">
-                <div>
-                    <label for="epochSlider" class="block text-lg font-semibold mb-2 text-gray-200">Eğitim Sayısı (Model): <span id="epochValue">N/A</span></label>
-                    <input type="range" id="epochSlider" min="1" max="100000" value="1" class="w-full h-2 bg-blue-600 rounded-lg appearance-none cursor-pointer opacity-50 cursor-not-allowed" disabled>
+            <!-- Center Panel - Main Results -->
+            <div class="flex flex-col space-y-4">
+                <div class="bg-gray-700 p-6 rounded-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-200 text-center">Predicted Digit</h2>
+                    <div id="predictionResult" class="text-6xl font-bold text-center text-green-400 p-6 border-2 border-dashed border-green-500 rounded-lg bg-green-900/20 shadow-inner">?</div>
                 </div>
 
-                <div>
-                    <h2 class="text-xl font-semibold mb-2 text-gray-200">Tahmin Edilen Rakam:</h2>
-                    <div id="predictionResult" class="text-4xl font-bold text-center text-green-500 p-4 border-2 border-dashed border-green-600 rounded-md bg-green-900">?</div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-200 text-center">Neural Network Connections</h2>
+                    <div id="networkConnections" class="rounded-lg bg-black p-4 relative overflow-hidden border border-gray-600">
+                        <canvas id="networkCanvas" width="500" height="350" class="w-full h-auto bg-black rounded"></canvas>
+                    </div>
                 </div>
+            </div>
 
-                <div>
-                    <h2 class="text-xl font-semibold mb-2 text-gray-200">CNN Katmanları Görselleştirme:</h2>
-                    <div id="cnnVisualization" class="rounded-md">
-                        <p class="text-gray-400 italic">CNN katmanlarının dinamik görselleştirmesi burada gösterilecektir (model çıktılarına göre).</p>
+            <!-- Right Panel - CNN Layers -->
+            <div class="flex flex-col space-y-4">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-200 text-center">CNN Layers</h2>
+                    <div id="cnnVisualization" class="rounded-lg">
+                        <div class="layer-loading">Computing layer activations...</div>
                     </div>
                 </div>
             </div>
